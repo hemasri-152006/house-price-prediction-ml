@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Luxury House Price Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="overlay">
+        <h1>🏡 Luxury Property Estimator</h1>
+        <p>AI-powered house price prediction</p>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+    <!-- FORM -->
+    <div class="card">
+        <h2>Property Details</h2>
+
+        <form method="POST">
+            <label>Location</label>
+            <input type="text" name="location" required>
+
+            <label>Area (sq ft)</label>
+            <input type="number" name="area" required>
+
+            <label>Bedrooms</label>
+            <input type="number" name="bedrooms" required>
+
+            <button type="submit">Estimate Price</button>
+        </form>
+    </div>
+
+    <!-- RESULT -->
+    <div class="card result">
+        <h2>Estimated Value</h2>
+
+        {% if prediction %}
+            <p class="location">📍 {{ location }}</p>
+            <div class="price">₹ {{ prediction }}</div>
+        {% else %}
+            <p>Enter details to predict price</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- GRAPH -->
+<div class="graph-card">
+    <h2>Market Trend (Area vs Price)</h2>
+    <canvas id="chart"></canvas>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+            ML Project
+</div>
+
+<script>
+const area = {{ area | tojson }};
+const price = {{ price | tojson }};
+const userArea = {{ user_area | tojson }};
+const userPrice = {{ user_price | tojson }};
+
+// Convert dataset to scatter format
+let marketData = area.map((a, i) => ({x: a, y: price[i]}));
+
+let datasets = [{
+    label: 'Market Data',
+    data: marketData,
+    borderColor: '#4facfe',
+    backgroundColor: '#4facfe',
+    showLine: true,
+    tension: 0.4
+}];
+
+// Add user point safely
+if (userArea && userPrice) {
+    datasets.push({
+        label: 'Your Property',
+        data: [{x: userArea, y: userPrice}],
+        backgroundColor: '#ffcc00',
+        pointRadius: 8
+    });
+}
+
+new Chart(document.getElementById('chart'), {
+    type: 'scatter',
+    data: { datasets: datasets },
+    options: {
+        plugins: {
+            legend: { labels: { color: 'white' } }
+        },
+        scales: {
+            x: {
+                type: 'linear',
+                title: { display: true, text: 'Area', color: 'white' },
+                ticks: { color: 'white' }
+            },
+            y: {
+                title: { display: true, text: 'Price', color: 'white' },
+                ticks: { color: 'white' }
+            }
+        }
+    }
+});
+</script>
+
+</body>
+</html>
